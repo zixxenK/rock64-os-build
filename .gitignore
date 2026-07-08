@@ -1,0 +1,5 @@
+# Local Armbian build outputs (if you run builds outside CI)
+output/
+armbian-build/
+*.img
+*.img.xz
