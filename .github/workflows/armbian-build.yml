@@ -23,6 +23,12 @@ jobs:
       - name: Checkout build config repo
         uses: actions/checkout@v4
 
+      # ADD THIS STEP HERE
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
       - name: Clone Armbian build framework
         run: >
           git clone --depth=1 https://github.com/armbian/build.git
