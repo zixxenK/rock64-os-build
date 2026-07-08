@@ -1,0 +1,50 @@
+---
+name: Build ROCK64 Armbian Image
+
+"on":
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Ubuntu release (Armbian userspace)
+        required: true
+        default: noble
+      branch:
+        description: Kernel branch
+        required: true
+        default: current
+
+jobs:
+  build-image:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout build config repo
+        uses: actions/checkout@v4
+
+      - name: Clone Armbian build framework
+        run: >
+          git clone --depth=1 https://github.com/armbian/build.git
+          /tmp/armbian-build
+
+      - name: Build ROCK64 image
+        working-directory: /tmp/armbian-build
+        run: |
+          ./compile.sh \
+            BOARD=rock64 \
+            BRANCH=${{ inputs.branch }} \
+            RELEASE=${{ inputs.release }} \
+            BUILD_MINIMAL=yes \
+            BUILD_DESKTOP=no \
+            KERNEL_CONFIGURE=no \
+            USERPATCHES_PATH=${{ github.workspace }}/userpatches
+
+      - name: Upload built image artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rock64-armbian-image-${{ inputs.release }}-${{ inputs.branch }}
+          path: |
+            /tmp/armbian-build/output/images/*
+            /tmp/armbian-build/output/debs/*
+          if-no-files-found: error
